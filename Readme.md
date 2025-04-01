@@ -1,6 +1,6 @@
 # Xetroc 1.0
 
-This repo contains the digital circuit design of tiny 32-bit computer fo educational purposes.
+This repo contains the digital circuit design of a tiny 32-bit computer for educational purposes.
 
 ![top level diagram](main.svg)
 
@@ -14,9 +14,10 @@ It supports only a minimal set of instructions:
 
 Besides the CPU, the design includes a 64k 16-bit code ROM and a 64kB 32-bit data RAM.
 
-The complete design is contained in the `main.circ` file which is to be loaded by the simulation software [logisim-evolution](https://github.com/logisim-evolution/logisim-evolution). Version 3.9 was used for testing.
+The complete design is contained in the `main.circ` file, which is to be loaded used with the design and simulation software [logisim-evolution](https://github.com/logisim-evolution/logisim-evolution). Version 3.9 was used for testing.
 
 Instruction mnemonics and binary 16-bit instruction encodings are compatible to the [armv6-m](https://developer.arm.com/documentation/ddi0419/c/Application-Level-Architecture/The-ARMv6-M-Instruction-Set) architecture.
+
 Sample programs are contained in the `*_rom.txt`files which can be loaded into the ROM and executed in a logisim-evolution simulation.
 
 The circuit is based on the Single_Cycle processor in https://github.com/dgsmith1988/Logisim-ARM-Processors which in turn is based on the book
@@ -28,7 +29,7 @@ The Instruction_Decoder in the Control_Unit was generated from the `Instruction_
 The code can be executed on a real MCU featuring an Arm Cortex-M core which was tested on STM32 Nucleo boards. You only need to setup SP to a reasonable RAM address.
 
 A C program can be used as a starting point and compiled with `arm-none-eabi-gcc -g -mcpu=cortex-m0 -mthumb -fomit-frame-pointer`. 
-Of course, the compiled assembly or machine code must be trimmed to stick to the resticted instruction set.
+Of course, the compiled assembly or machine code must be trimmed to stick to the restricted instruction set. Neither function calls nor returns are implemented.
 
 
 ## Limitations

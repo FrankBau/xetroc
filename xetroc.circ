@@ -526,8 +526,8 @@
       <a name="addrWidth" val="16"/>
       <a name="appearance" val="classic"/>
       <a name="contents">addr/data: 16 16
-2111 2222 2333 2444 9101 9202 9303 9404
-9904 9a03 9b02 9c01 e7fe
+2000 9000 2001 9001 9800 9901 1842 d402
+9100 9201 e7f8 e7fe
 </a>
       <a name="dataWidth" val="16"/>
       <a name="label" val="ROM1"/>
@@ -548,7 +548,7 @@
       <a name="label" val="Control_Unit1"/>
       <a name="labelvisible" val="false"/>
     </comp>
-    <comp loc="(850,260)" name="RegisterFile">
+    <comp loc="(850,250)" name="RegisterFile">
       <a name="label" val="RegisterFile1"/>
       <a name="labelvisible" val="false"/>
     </comp>
@@ -673,14 +673,14 @@
     <wire from="(670,130)" to="(720,130)"/>
     <wire from="(670,140)" to="(710,140)"/>
     <wire from="(670,150)" to="(690,150)"/>
-    <wire from="(670,280)" to="(670,310)"/>
-    <wire from="(670,280)" to="(750,280)"/>
+    <wire from="(670,270)" to="(670,310)"/>
+    <wire from="(670,270)" to="(750,270)"/>
     <wire from="(670,80)" to="(690,80)"/>
     <wire from="(670,90)" to="(1500,90)"/>
-    <wire from="(680,250)" to="(680,270)"/>
-    <wire from="(680,270)" to="(750,270)"/>
-    <wire from="(680,290)" to="(680,380)"/>
-    <wire from="(680,290)" to="(750,290)"/>
+    <wire from="(680,250)" to="(680,260)"/>
+    <wire from="(680,260)" to="(750,260)"/>
+    <wire from="(680,280)" to="(680,380)"/>
+    <wire from="(680,280)" to="(750,280)"/>
     <wire from="(690,150)" to="(690,180)"/>
     <wire from="(690,220)" to="(710,220)"/>
     <wire from="(690,40)" to="(690,80)"/>
@@ -689,8 +689,8 @@
     <wire from="(710,140)" to="(710,220)"/>
     <wire from="(710,220)" to="(710,300)"/>
     <wire from="(710,300)" to="(750,300)"/>
-    <wire from="(710,320)" to="(710,470)"/>
-    <wire from="(710,320)" to="(750,320)"/>
+    <wire from="(710,330)" to="(710,470)"/>
+    <wire from="(710,330)" to="(750,330)"/>
     <wire from="(720,130)" to="(720,150)"/>
     <wire from="(720,150)" to="(720,400)"/>
     <wire from="(720,150)" to="(730,150)"/>
@@ -698,18 +698,15 @@
     <wire from="(730,310)" to="(730,500)"/>
     <wire from="(730,310)" to="(750,310)"/>
     <wire from="(730,500)" to="(1430,500)"/>
-    <wire from="(740,200)" to="(740,260)"/>
+    <wire from="(740,200)" to="(740,240)"/>
     <wire from="(740,200)" to="(750,200)"/>
-    <wire from="(740,260)" to="(750,260)"/>
-    <wire from="(850,260)" to="(870,260)"/>
-    <wire from="(850,270)" to="(870,270)"/>
+    <wire from="(740,240)" to="(750,240)"/>
+    <wire from="(850,250)" to="(970,250)"/>
+    <wire from="(850,300)" to="(860,300)"/>
     <wire from="(850,400)" to="(880,400)"/>
-    <wire from="(870,250)" to="(870,260)"/>
-    <wire from="(870,250)" to="(970,250)"/>
-    <wire from="(870,270)" to="(870,300)"/>
-    <wire from="(870,300)" to="(870,380)"/>
-    <wire from="(870,300)" to="(890,300)"/>
-    <wire from="(870,380)" to="(970,380)"/>
+    <wire from="(860,300)" to="(860,380)"/>
+    <wire from="(860,300)" to="(890,300)"/>
+    <wire from="(860,380)" to="(970,380)"/>
     <wire from="(880,320)" to="(880,400)"/>
     <wire from="(880,320)" to="(890,320)"/>
     <wire from="(880,400)" to="(880,430)"/>
@@ -728,10 +725,41 @@
     <wire from="(970,380)" to="(1120,380)"/>
   </circuit>
   <circuit name="RegisterFile">
-    <a name="appearance" val="evolution"/>
+    <a name="appearance" val="custom"/>
     <a name="circuit" val="RegisterFile"/>
     <a name="circuitnamedboxfixedsize" val="true"/>
     <a name="simulationFrequency" val="2.0"/>
+    <appear>
+      <rect fill="none" height="110" stroke="#000000" width="100" x="30" y="50"/>
+      <visible-register height="10" path="/Register(480,250)" stroke-width="0" width="53" x="54" y="72"/>
+      <visible-register height="10" path="/Register(480,390)" stroke-width="0" width="53" x="54" y="82"/>
+      <visible-register height="10" path="/Register(480,530)" stroke-width="0" width="53" x="54" y="92"/>
+      <visible-register height="10" path="/Register(480,670)" stroke-width="0" width="53" x="54" y="102"/>
+      <visible-register height="10" path="/Register(480,810)" stroke-width="0" width="53" x="54" y="115"/>
+      <visible-register height="10" path="/Register(480,950)" stroke-width="0" width="53" x="54" y="125"/>
+      <visible-register height="10" path="/Register(480,1090)" stroke-width="0" width="53" x="54" y="135"/>
+      <visible-register height="10" path="/Register(480,1230)" stroke-width="0" width="53" x="54" y="145"/>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="8" text-anchor="middle" x="48" y="60">SP_PC</text>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="8" text-anchor="middle" x="41" y="79">A1</text>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="8" text-anchor="middle" x="41" y="90">A2</text>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="8" text-anchor="middle" x="41" y="101">A3</text>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="6" text-anchor="middle" x="42" y="129">WD3</text>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="8" text-anchor="middle" x="43" y="152">R15</text>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="6" text-anchor="middle" x="42" y="120">WE3</text>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="8" text-anchor="middle" x="118" y="69">RD1</text>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="8" text-anchor="middle" x="117" y="119">RD2</text>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="12" text-anchor="middle" x="96" y="57">RegisterFile</text>
+      <circ-anchor facing="east" x="130" y="70"/>
+      <circ-port dir="in" pin="160,240" x="30" y="120"/>
+      <circ-port dir="in" pin="170,30" x="30" y="60"/>
+      <circ-port dir="in" pin="180,140" x="30" y="90"/>
+      <circ-port dir="in" pin="180,180" x="30" y="100"/>
+      <circ-port dir="in" pin="180,60" x="30" y="80"/>
+      <circ-port dir="in" pin="210,1360" x="30" y="150"/>
+      <circ-port dir="in" pin="210,280" x="30" y="130"/>
+      <circ-port dir="out" pin="1030,540" x="130" y="70"/>
+      <circ-port dir="out" pin="1040,910" x="130" y="120"/>
+    </appear>
     <comp lib="0" loc="(1030,540)" name="Pin">
       <a name="appearance" val="NewPins"/>
       <a name="facing" val="west"/>
@@ -1035,7 +1063,7 @@
       <text dominant-baseline="central" font-family="SansSerif" font-size="12" text-anchor="middle" x="59" y="125">B</text>
       <text dominant-baseline="central" font-family="SansSerif" font-size="12" text-anchor="middle" x="87" y="109">Result</text>
       <text dominant-baseline="central" font-family="SansSerif" font-size="12" text-anchor="middle" x="89" y="88">Flags</text>
-      <text dominant-baseline="central" font-family="SansSerif" font-size="12" text-anchor="middle" x="80" y="69">ctrl</text>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="12" text-anchor="middle" x="80" y="69">Ctrl</text>
       <polyline fill="none" points="50,51 50,90" stroke="#000000"/>
       <polyline fill="none" points="51,90 60,100" stroke="#000000"/>
       <polyline fill="none" points="61,100 50,110" stroke="#000000"/>
@@ -1043,6 +1071,7 @@
       <polyline fill="none" points="50,50 110,69" stroke="#000000"/>
       <polyline fill="none" points="110,69 110,130" stroke="#000000"/>
       <polyline fill="none" points="50,150 110,131" stroke="#000000"/>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="14" text-anchor="middle" x="84" y="127">ALU</text>
       <circ-anchor facing="east" x="110" y="110"/>
       <circ-port dir="in" pin="250,300" x="50" y="70"/>
       <circ-port dir="in" pin="250,340" x="50" y="130"/>
@@ -1979,6 +2008,12 @@
       <a name="incoming" val="4"/>
       <a name="spacing" val="9"/>
     </comp>
+    <comp lib="0" loc="(510,510)" name="Splitter">
+      <a name="appear" val="right"/>
+      <a name="facing" val="south"/>
+      <a name="fanout" val="4"/>
+      <a name="incoming" val="4"/>
+    </comp>
     <comp lib="0" loc="(550,240)" name="Pin">
       <a name="appearance" val="NewPins"/>
       <a name="facing" val="south"/>
@@ -2020,6 +2055,34 @@
       <a name="showInTab" val="true"/>
       <a name="width" val="2"/>
     </comp>
+    <comp lib="5" loc="(460,580)" name="LED">
+      <a name="color" val="#00f000"/>
+      <a name="facing" val="north"/>
+      <a name="label" val="N"/>
+      <a name="labelloc" val="south"/>
+      <a name="offcolor" val="#006000"/>
+    </comp>
+    <comp lib="5" loc="(490,580)" name="LED">
+      <a name="color" val="#00f000"/>
+      <a name="facing" val="north"/>
+      <a name="label" val="Z"/>
+      <a name="labelloc" val="south"/>
+      <a name="offcolor" val="#006000"/>
+    </comp>
+    <comp lib="5" loc="(520,580)" name="LED">
+      <a name="color" val="#00f000"/>
+      <a name="facing" val="north"/>
+      <a name="label" val="C"/>
+      <a name="labelloc" val="south"/>
+      <a name="offcolor" val="#006000"/>
+    </comp>
+    <comp lib="5" loc="(550,580)" name="LED">
+      <a name="color" val="#00f000"/>
+      <a name="facing" val="north"/>
+      <a name="label" val="V"/>
+      <a name="labelloc" val="south"/>
+      <a name="offcolor" val="#006000"/>
+    </comp>
     <comp loc="(810,460)" name="Condition_Check">
       <a name="label" val="Condition_Check1"/>
     </comp>
@@ -2053,12 +2116,27 @@
     <wire from="(320,620)" to="(320,630)"/>
     <wire from="(320,630)" to="(830,630)"/>
     <wire from="(390,370)" to="(470,370)"/>
-    <wire from="(390,500)" to="(470,500)"/>
+    <wire from="(390,500)" to="(430,500)"/>
+    <wire from="(430,480)" to="(430,500)"/>
+    <wire from="(430,480)" to="(470,480)"/>
+    <wire from="(460,560)" to="(460,580)"/>
+    <wire from="(460,560)" to="(470,560)"/>
     <wire from="(470,370)" to="(470,390)"/>
-    <wire from="(470,480)" to="(470,500)"/>
-    <wire from="(490,480)" to="(590,480)"/>
+    <wire from="(470,530)" to="(470,560)"/>
+    <wire from="(480,530)" to="(480,560)"/>
+    <wire from="(480,560)" to="(490,560)"/>
+    <wire from="(490,480)" to="(510,480)"/>
+    <wire from="(490,530)" to="(490,550)"/>
+    <wire from="(490,550)" to="(520,550)"/>
+    <wire from="(490,560)" to="(490,580)"/>
+    <wire from="(500,530)" to="(500,540)"/>
+    <wire from="(500,540)" to="(550,540)"/>
+    <wire from="(510,480)" to="(510,510)"/>
+    <wire from="(510,480)" to="(590,480)"/>
+    <wire from="(520,550)" to="(520,580)"/>
     <wire from="(550,240)" to="(550,460)"/>
     <wire from="(550,460)" to="(590,460)"/>
+    <wire from="(550,540)" to="(550,580)"/>
     <wire from="(80,440)" to="(280,440)"/>
     <wire from="(810,460)" to="(830,460)"/>
     <wire from="(830,290)" to="(830,460)"/>
@@ -2386,10 +2464,43 @@
     <wire from="(840,40)" to="(840,300)"/>
   </circuit>
   <circuit name="Control_Unit">
-    <a name="appearance" val="evolution"/>
+    <a name="appearance" val="custom"/>
     <a name="circuit" val="Control_Unit"/>
     <a name="circuitnamedboxfixedsize" val="true"/>
     <a name="simulationFrequency" val="2.0"/>
+    <appear>
+      <rect fill="none" height="111" stroke="#000000" width="129" x="41" y="50"/>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="10" text-anchor="middle" x="72" y="79">ALUFlags</text>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="10" text-anchor="middle" x="57" y="90">Instr</text>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="10" text-anchor="middle" x="149" y="79">PCSrc</text>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="10" text-anchor="middle" x="138" y="88">MemToReg</text>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="10" text-anchor="middle" x="140" y="99">MemWrite</text>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="10" text-anchor="middle" x="137" y="109">ALUControl</text>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="10" text-anchor="middle" x="147" y="118">ALUSrc</text>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="10" text-anchor="middle" x="146" y="128">ImmSrc</text>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="10" text-anchor="middle" x="142" y="139">RegWrite</text>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="10" text-anchor="middle" x="146" y="149">RegSrc</text>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="14" text-anchor="middle" x="105" y="60">Control_Unit</text>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="12" text-anchor="middle" x="58" y="129">N</text>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="12" text-anchor="middle" x="69" y="129">Z</text>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="12" text-anchor="middle" x="81" y="129">C</text>
+      <text dominant-baseline="central" font-family="SansSerif" font-size="12" text-anchor="middle" x="93" y="129">V</text>
+      <visible-led height="10" path="/Conditional_Logic(860,60)/LED(460,580)" stroke-width="0" width="10" x="52" y="137"/>
+      <visible-led height="10" path="/Conditional_Logic(860,60)/LED(490,580)" stroke-width="0" width="10" x="64" y="137"/>
+      <visible-led height="10" path="/Conditional_Logic(860,60)/LED(520,580)" stroke-width="0" width="10" x="76" y="137"/>
+      <visible-led height="10" path="/Conditional_Logic(860,60)/LED(550,580)" stroke-width="0" width="10" x="88" y="137"/>
+      <circ-anchor facing="east" x="170" y="80"/>
+      <circ-port dir="in" pin="200,300" x="40" y="90"/>
+      <circ-port dir="in" pin="200,60" x="40" y="80"/>
+      <circ-port dir="out" pin="1050,100" x="170" y="90"/>
+      <circ-port dir="out" pin="1050,140" x="170" y="100"/>
+      <circ-port dir="out" pin="1050,180" x="170" y="110"/>
+      <circ-port dir="out" pin="1050,220" x="170" y="120"/>
+      <circ-port dir="out" pin="1050,260" x="170" y="130"/>
+      <circ-port dir="out" pin="1050,300" x="170" y="140"/>
+      <circ-port dir="out" pin="1050,340" x="170" y="150"/>
+      <circ-port dir="out" pin="1050,60" x="170" y="80"/>
+    </appear>
     <comp lib="0" loc="(1050,100)" name="Pin">
       <a name="appearance" val="NewPins"/>
       <a name="facing" val="west"/>
@@ -2506,6 +2617,9 @@
     <comp lib="8" loc="(1350,140)" name="Text">
       <a name="text" val="1 for writing WriteData to RAM "/>
     </comp>
+    <comp lib="8" loc="(1365,70)" name="Text">
+      <a name="text" val="1 for using computed Result for PC"/>
+    </comp>
     <comp lib="8" loc="(1375,310)" name="Text">
       <a name="text" val="1 for RegisterFile write enable (WE3)"/>
     </comp>
@@ -2514,9 +2628,6 @@
     </comp>
     <comp lib="8" loc="(1395,230)" name="Text">
       <a name="text" val="0 for using RD2 1 for ExtImm as ALU SrcB"/>
-    </comp>
-    <comp lib="8" loc="(1400,70)" name="Text">
-      <a name="text" val="1 for using computed Result for PC"/>
     </comp>
     <comp lib="8" loc="(1410,265)" name="Text">
       <a name="text" val="select which kind of imm exension to ExtImm"/>
@@ -5257,7 +5368,7 @@
     </comp>
     <comp loc="(1070,290)" name="ALU"/>
     <comp loc="(670,80)" name="Control_Unit"/>
-    <comp loc="(850,260)" name="RegisterFile"/>
+    <comp loc="(850,250)" name="RegisterFile"/>
     <comp loc="(850,400)" name="Immediate"/>
     <wire from="(1030,170)" to="(1040,170)"/>
     <wire from="(1040,110)" to="(1040,170)"/>
@@ -5370,22 +5481,22 @@
     <wire from="(670,130)" to="(720,130)"/>
     <wire from="(670,140)" to="(710,140)"/>
     <wire from="(670,150)" to="(690,150)"/>
-    <wire from="(670,280)" to="(670,310)"/>
-    <wire from="(670,280)" to="(750,280)"/>
+    <wire from="(670,270)" to="(670,310)"/>
+    <wire from="(670,270)" to="(750,270)"/>
     <wire from="(670,80)" to="(690,80)"/>
     <wire from="(670,90)" to="(1500,90)"/>
-    <wire from="(680,250)" to="(680,270)"/>
-    <wire from="(680,270)" to="(750,270)"/>
-    <wire from="(680,290)" to="(680,380)"/>
-    <wire from="(680,290)" to="(750,290)"/>
+    <wire from="(680,250)" to="(680,260)"/>
+    <wire from="(680,260)" to="(750,260)"/>
+    <wire from="(680,280)" to="(680,380)"/>
+    <wire from="(680,280)" to="(750,280)"/>
     <wire from="(690,150)" to="(690,180)"/>
     <wire from="(690,40)" to="(690,80)"/>
     <wire from="(70,190)" to="(340,190)"/>
     <wire from="(70,190)" to="(70,240)"/>
     <wire from="(710,140)" to="(710,300)"/>
     <wire from="(710,300)" to="(750,300)"/>
-    <wire from="(710,320)" to="(710,470)"/>
-    <wire from="(710,320)" to="(750,320)"/>
+    <wire from="(710,330)" to="(710,470)"/>
+    <wire from="(710,330)" to="(750,330)"/>
     <wire from="(720,130)" to="(720,150)"/>
     <wire from="(720,150)" to="(720,400)"/>
     <wire from="(720,150)" to="(730,150)"/>
@@ -5393,18 +5504,15 @@
     <wire from="(730,310)" to="(730,500)"/>
     <wire from="(730,310)" to="(750,310)"/>
     <wire from="(730,500)" to="(940,500)"/>
-    <wire from="(740,200)" to="(740,260)"/>
+    <wire from="(740,200)" to="(740,240)"/>
     <wire from="(740,200)" to="(750,200)"/>
-    <wire from="(740,260)" to="(750,260)"/>
-    <wire from="(850,260)" to="(870,260)"/>
-    <wire from="(850,270)" to="(870,270)"/>
+    <wire from="(740,240)" to="(750,240)"/>
+    <wire from="(850,250)" to="(970,250)"/>
+    <wire from="(850,300)" to="(860,300)"/>
     <wire from="(850,400)" to="(880,400)"/>
-    <wire from="(870,250)" to="(870,260)"/>
-    <wire from="(870,250)" to="(970,250)"/>
-    <wire from="(870,270)" to="(870,300)"/>
-    <wire from="(870,300)" to="(870,380)"/>
-    <wire from="(870,300)" to="(890,300)"/>
-    <wire from="(870,380)" to="(970,380)"/>
+    <wire from="(860,300)" to="(860,380)"/>
+    <wire from="(860,300)" to="(890,300)"/>
+    <wire from="(860,380)" to="(970,380)"/>
     <wire from="(880,320)" to="(880,400)"/>
     <wire from="(880,320)" to="(890,320)"/>
     <wire from="(880,400)" to="(880,430)"/>
@@ -5810,7 +5918,7 @@
     </comp>
     <comp loc="(1070,290)" name="ALU"/>
     <comp loc="(670,80)" name="Control_Unit"/>
-    <comp loc="(850,260)" name="RegisterFile"/>
+    <comp loc="(850,250)" name="RegisterFile"/>
     <comp loc="(850,400)" name="Immediate"/>
     <wire from="(1030,170)" to="(1040,170)"/>
     <wire from="(1040,110)" to="(1040,170)"/>
@@ -5911,37 +6019,34 @@
     <wire from="(670,130)" to="(720,130)"/>
     <wire from="(670,140)" to="(710,140)"/>
     <wire from="(670,150)" to="(690,150)"/>
-    <wire from="(670,280)" to="(670,310)"/>
-    <wire from="(670,280)" to="(750,280)"/>
+    <wire from="(670,270)" to="(670,310)"/>
+    <wire from="(670,270)" to="(750,270)"/>
     <wire from="(670,80)" to="(690,80)"/>
-    <wire from="(680,250)" to="(680,270)"/>
-    <wire from="(680,270)" to="(750,270)"/>
-    <wire from="(680,290)" to="(680,380)"/>
-    <wire from="(680,290)" to="(750,290)"/>
+    <wire from="(680,250)" to="(680,260)"/>
+    <wire from="(680,260)" to="(750,260)"/>
+    <wire from="(680,280)" to="(680,380)"/>
+    <wire from="(680,280)" to="(750,280)"/>
     <wire from="(690,150)" to="(690,180)"/>
     <wire from="(690,40)" to="(690,80)"/>
     <wire from="(70,190)" to="(340,190)"/>
     <wire from="(70,190)" to="(70,240)"/>
     <wire from="(710,140)" to="(710,300)"/>
     <wire from="(710,300)" to="(750,300)"/>
-    <wire from="(710,320)" to="(710,470)"/>
-    <wire from="(710,320)" to="(750,320)"/>
+    <wire from="(710,330)" to="(710,470)"/>
+    <wire from="(710,330)" to="(750,330)"/>
     <wire from="(720,130)" to="(720,400)"/>
     <wire from="(720,400)" to="(750,400)"/>
     <wire from="(730,310)" to="(730,500)"/>
     <wire from="(730,310)" to="(750,310)"/>
     <wire from="(730,500)" to="(940,500)"/>
-    <wire from="(740,200)" to="(740,260)"/>
-    <wire from="(740,260)" to="(750,260)"/>
-    <wire from="(850,260)" to="(870,260)"/>
-    <wire from="(850,270)" to="(870,270)"/>
+    <wire from="(740,200)" to="(740,240)"/>
+    <wire from="(740,240)" to="(750,240)"/>
+    <wire from="(850,250)" to="(970,250)"/>
+    <wire from="(850,300)" to="(860,300)"/>
     <wire from="(850,400)" to="(880,400)"/>
-    <wire from="(870,250)" to="(870,260)"/>
-    <wire from="(870,250)" to="(970,250)"/>
-    <wire from="(870,270)" to="(870,300)"/>
-    <wire from="(870,300)" to="(870,380)"/>
-    <wire from="(870,300)" to="(890,300)"/>
-    <wire from="(870,380)" to="(970,380)"/>
+    <wire from="(860,300)" to="(860,380)"/>
+    <wire from="(860,300)" to="(890,300)"/>
+    <wire from="(860,380)" to="(970,380)"/>
     <wire from="(880,320)" to="(880,400)"/>
     <wire from="(880,320)" to="(890,320)"/>
     <wire from="(880,400)" to="(880,430)"/>
@@ -6317,7 +6422,7 @@
     </comp>
     <comp loc="(1070,290)" name="ALU"/>
     <comp loc="(670,80)" name="Control_Unit"/>
-    <comp loc="(850,260)" name="RegisterFile"/>
+    <comp loc="(850,250)" name="RegisterFile"/>
     <comp loc="(850,400)" name="Immediate"/>
     <wire from="(1030,170)" to="(1040,170)"/>
     <wire from="(1040,110)" to="(1040,170)"/>
@@ -6410,21 +6515,21 @@
     <wire from="(670,130)" to="(720,130)"/>
     <wire from="(670,140)" to="(710,140)"/>
     <wire from="(670,150)" to="(690,150)"/>
-    <wire from="(670,280)" to="(670,310)"/>
-    <wire from="(670,280)" to="(750,280)"/>
+    <wire from="(670,270)" to="(670,310)"/>
+    <wire from="(670,270)" to="(750,270)"/>
     <wire from="(670,80)" to="(690,80)"/>
-    <wire from="(680,250)" to="(680,270)"/>
-    <wire from="(680,270)" to="(750,270)"/>
-    <wire from="(680,290)" to="(680,380)"/>
-    <wire from="(680,290)" to="(750,290)"/>
+    <wire from="(680,250)" to="(680,260)"/>
+    <wire from="(680,260)" to="(750,260)"/>
+    <wire from="(680,280)" to="(680,380)"/>
+    <wire from="(680,280)" to="(750,280)"/>
     <wire from="(690,150)" to="(690,180)"/>
     <wire from="(690,40)" to="(690,80)"/>
     <wire from="(70,190)" to="(340,190)"/>
     <wire from="(70,190)" to="(70,240)"/>
     <wire from="(710,140)" to="(710,300)"/>
     <wire from="(710,300)" to="(750,300)"/>
-    <wire from="(710,320)" to="(710,470)"/>
-    <wire from="(710,320)" to="(750,320)"/>
+    <wire from="(710,330)" to="(710,470)"/>
+    <wire from="(710,330)" to="(750,330)"/>
     <wire from="(720,130)" to="(720,150)"/>
     <wire from="(720,150)" to="(720,400)"/>
     <wire from="(720,150)" to="(730,150)"/>
@@ -6432,16 +6537,12 @@
     <wire from="(730,310)" to="(730,500)"/>
     <wire from="(730,310)" to="(750,310)"/>
     <wire from="(730,500)" to="(940,500)"/>
-    <wire from="(740,200)" to="(740,260)"/>
+    <wire from="(740,200)" to="(740,240)"/>
     <wire from="(740,200)" to="(750,200)"/>
-    <wire from="(740,260)" to="(750,260)"/>
-    <wire from="(850,260)" to="(870,260)"/>
-    <wire from="(850,270)" to="(870,270)"/>
+    <wire from="(740,240)" to="(750,240)"/>
+    <wire from="(850,250)" to="(970,250)"/>
+    <wire from="(850,300)" to="(890,300)"/>
     <wire from="(850,400)" to="(880,400)"/>
-    <wire from="(870,250)" to="(870,260)"/>
-    <wire from="(870,250)" to="(970,250)"/>
-    <wire from="(870,270)" to="(870,300)"/>
-    <wire from="(870,300)" to="(890,300)"/>
     <wire from="(880,320)" to="(880,400)"/>
     <wire from="(880,320)" to="(890,320)"/>
     <wire from="(880,400)" to="(880,430)"/>
@@ -6789,7 +6890,7 @@
     </comp>
     <comp loc="(1070,290)" name="ALU"/>
     <comp loc="(670,80)" name="Control_Unit"/>
-    <comp loc="(850,260)" name="RegisterFile"/>
+    <comp loc="(850,250)" name="RegisterFile"/>
     <comp loc="(850,400)" name="Immediate"/>
     <wire from="(1030,170)" to="(1040,170)"/>
     <wire from="(1040,110)" to="(1040,170)"/>
@@ -6877,35 +6978,31 @@
     <wire from="(670,130)" to="(720,130)"/>
     <wire from="(670,140)" to="(710,140)"/>
     <wire from="(670,150)" to="(690,150)"/>
-    <wire from="(670,280)" to="(670,310)"/>
-    <wire from="(670,280)" to="(750,280)"/>
+    <wire from="(670,270)" to="(670,310)"/>
+    <wire from="(670,270)" to="(750,270)"/>
     <wire from="(670,80)" to="(690,80)"/>
-    <wire from="(680,250)" to="(680,270)"/>
-    <wire from="(680,270)" to="(750,270)"/>
-    <wire from="(680,290)" to="(680,380)"/>
-    <wire from="(680,290)" to="(750,290)"/>
+    <wire from="(680,250)" to="(680,260)"/>
+    <wire from="(680,260)" to="(750,260)"/>
+    <wire from="(680,280)" to="(680,380)"/>
+    <wire from="(680,280)" to="(750,280)"/>
     <wire from="(690,150)" to="(690,180)"/>
     <wire from="(690,40)" to="(690,80)"/>
     <wire from="(70,190)" to="(340,190)"/>
     <wire from="(70,190)" to="(70,240)"/>
     <wire from="(710,140)" to="(710,300)"/>
     <wire from="(710,300)" to="(750,300)"/>
-    <wire from="(710,320)" to="(710,470)"/>
-    <wire from="(710,320)" to="(750,320)"/>
+    <wire from="(710,330)" to="(710,470)"/>
+    <wire from="(710,330)" to="(750,330)"/>
     <wire from="(720,130)" to="(720,400)"/>
     <wire from="(720,400)" to="(750,400)"/>
-    <wire from="(730,310)" to="(730,500)"/>
-    <wire from="(730,310)" to="(750,310)"/>
+    <wire from="(730,320)" to="(730,500)"/>
+    <wire from="(730,320)" to="(750,320)"/>
     <wire from="(730,500)" to="(940,500)"/>
-    <wire from="(740,200)" to="(740,260)"/>
-    <wire from="(740,260)" to="(750,260)"/>
-    <wire from="(850,260)" to="(870,260)"/>
-    <wire from="(850,270)" to="(870,270)"/>
+    <wire from="(740,200)" to="(740,240)"/>
+    <wire from="(740,240)" to="(750,240)"/>
+    <wire from="(850,250)" to="(970,250)"/>
+    <wire from="(850,300)" to="(890,300)"/>
     <wire from="(850,400)" to="(880,400)"/>
-    <wire from="(870,250)" to="(870,260)"/>
-    <wire from="(870,250)" to="(970,250)"/>
-    <wire from="(870,270)" to="(870,300)"/>
-    <wire from="(870,300)" to="(890,300)"/>
     <wire from="(880,320)" to="(880,400)"/>
     <wire from="(880,320)" to="(890,320)"/>
     <wire from="(880,400)" to="(880,430)"/>
@@ -7214,7 +7311,7 @@
     </comp>
     <comp loc="(1070,290)" name="ALU"/>
     <comp loc="(670,80)" name="Control_Unit"/>
-    <comp loc="(850,260)" name="RegisterFile"/>
+    <comp loc="(850,250)" name="RegisterFile"/>
     <comp loc="(850,400)" name="Immediate"/>
     <wire from="(1030,170)" to="(1040,170)"/>
     <wire from="(1040,110)" to="(1040,170)"/>
@@ -7285,12 +7382,12 @@
     <wire from="(670,130)" to="(720,130)"/>
     <wire from="(670,140)" to="(710,140)"/>
     <wire from="(670,150)" to="(690,150)"/>
-    <wire from="(670,280)" to="(670,310)"/>
-    <wire from="(670,280)" to="(750,280)"/>
-    <wire from="(680,250)" to="(680,270)"/>
-    <wire from="(680,270)" to="(750,270)"/>
-    <wire from="(680,290)" to="(680,380)"/>
-    <wire from="(680,290)" to="(750,290)"/>
+    <wire from="(670,270)" to="(670,310)"/>
+    <wire from="(670,270)" to="(750,270)"/>
+    <wire from="(680,250)" to="(680,260)"/>
+    <wire from="(680,260)" to="(750,260)"/>
+    <wire from="(680,280)" to="(680,380)"/>
+    <wire from="(680,280)" to="(750,280)"/>
     <wire from="(690,150)" to="(690,180)"/>
     <wire from="(710,140)" to="(710,300)"/>
     <wire from="(710,300)" to="(750,300)"/>
@@ -7299,15 +7396,11 @@
     <wire from="(730,310)" to="(730,500)"/>
     <wire from="(730,310)" to="(750,310)"/>
     <wire from="(730,500)" to="(940,500)"/>
-    <wire from="(740,200)" to="(740,260)"/>
-    <wire from="(740,260)" to="(750,260)"/>
-    <wire from="(850,260)" to="(870,260)"/>
-    <wire from="(850,270)" to="(870,270)"/>
+    <wire from="(740,200)" to="(740,240)"/>
+    <wire from="(740,240)" to="(750,240)"/>
+    <wire from="(850,250)" to="(970,250)"/>
+    <wire from="(850,300)" to="(890,300)"/>
     <wire from="(850,400)" to="(880,400)"/>
-    <wire from="(870,250)" to="(870,260)"/>
-    <wire from="(870,250)" to="(970,250)"/>
-    <wire from="(870,270)" to="(870,300)"/>
-    <wire from="(870,300)" to="(890,300)"/>
     <wire from="(880,320)" to="(880,400)"/>
     <wire from="(880,320)" to="(890,320)"/>
     <wire from="(880,400)" to="(880,430)"/>
@@ -7558,7 +7651,7 @@
     </comp>
     <comp loc="(1070,290)" name="ALU"/>
     <comp loc="(670,80)" name="Control_Unit"/>
-    <comp loc="(850,260)" name="RegisterFile"/>
+    <comp loc="(850,250)" name="RegisterFile"/>
     <comp loc="(850,400)" name="Immediate"/>
     <wire from="(1030,170)" to="(1040,170)"/>
     <wire from="(1040,110)" to="(1040,170)"/>
@@ -7616,12 +7709,12 @@
     <wire from="(670,130)" to="(720,130)"/>
     <wire from="(670,140)" to="(710,140)"/>
     <wire from="(670,150)" to="(690,150)"/>
-    <wire from="(670,280)" to="(670,310)"/>
-    <wire from="(670,280)" to="(750,280)"/>
-    <wire from="(680,250)" to="(680,270)"/>
-    <wire from="(680,270)" to="(750,270)"/>
-    <wire from="(680,290)" to="(680,380)"/>
-    <wire from="(680,290)" to="(750,290)"/>
+    <wire from="(670,270)" to="(670,310)"/>
+    <wire from="(670,270)" to="(750,270)"/>
+    <wire from="(680,250)" to="(680,260)"/>
+    <wire from="(680,260)" to="(750,260)"/>
+    <wire from="(680,280)" to="(680,380)"/>
+    <wire from="(680,280)" to="(750,280)"/>
     <wire from="(690,150)" to="(690,180)"/>
     <wire from="(710,140)" to="(710,300)"/>
     <wire from="(710,300)" to="(750,300)"/>
@@ -7630,15 +7723,11 @@
     <wire from="(730,310)" to="(730,500)"/>
     <wire from="(730,310)" to="(750,310)"/>
     <wire from="(730,500)" to="(940,500)"/>
-    <wire from="(740,200)" to="(740,260)"/>
-    <wire from="(740,260)" to="(750,260)"/>
-    <wire from="(850,260)" to="(870,260)"/>
-    <wire from="(850,270)" to="(870,270)"/>
+    <wire from="(740,200)" to="(740,240)"/>
+    <wire from="(740,240)" to="(750,240)"/>
+    <wire from="(850,250)" to="(960,250)"/>
+    <wire from="(850,300)" to="(890,300)"/>
     <wire from="(850,400)" to="(880,400)"/>
-    <wire from="(870,250)" to="(870,260)"/>
-    <wire from="(870,250)" to="(960,250)"/>
-    <wire from="(870,270)" to="(870,300)"/>
-    <wire from="(870,300)" to="(890,300)"/>
     <wire from="(880,320)" to="(880,400)"/>
     <wire from="(880,320)" to="(890,320)"/>
     <wire from="(880,400)" to="(880,430)"/>
@@ -7876,7 +7965,7 @@
     </comp>
     <comp loc="(1070,290)" name="ALU"/>
     <comp loc="(670,80)" name="Control_Unit"/>
-    <comp loc="(850,260)" name="RegisterFile"/>
+    <comp loc="(850,250)" name="RegisterFile"/>
     <wire from="(1030,170)" to="(1040,170)"/>
     <wire from="(1040,110)" to="(1040,170)"/>
     <wire from="(1040,170)" to="(1040,240)"/>
@@ -7929,25 +8018,23 @@
     <wire from="(670,110)" to="(1040,110)"/>
     <wire from="(670,140)" to="(710,140)"/>
     <wire from="(670,150)" to="(690,150)"/>
-    <wire from="(670,280)" to="(670,310)"/>
-    <wire from="(670,280)" to="(750,280)"/>
-    <wire from="(680,250)" to="(680,270)"/>
-    <wire from="(680,270)" to="(750,270)"/>
-    <wire from="(680,290)" to="(680,380)"/>
-    <wire from="(680,290)" to="(750,290)"/>
+    <wire from="(670,270)" to="(670,310)"/>
+    <wire from="(670,270)" to="(750,270)"/>
+    <wire from="(680,250)" to="(680,260)"/>
+    <wire from="(680,260)" to="(750,260)"/>
+    <wire from="(680,280)" to="(680,380)"/>
+    <wire from="(680,280)" to="(750,280)"/>
     <wire from="(690,150)" to="(690,180)"/>
     <wire from="(710,140)" to="(710,300)"/>
     <wire from="(710,300)" to="(750,300)"/>
     <wire from="(730,310)" to="(730,380)"/>
     <wire from="(730,310)" to="(750,310)"/>
     <wire from="(730,380)" to="(940,380)"/>
-    <wire from="(740,200)" to="(740,260)"/>
-    <wire from="(740,260)" to="(750,260)"/>
-    <wire from="(850,260)" to="(870,260)"/>
-    <wire from="(850,270)" to="(870,270)"/>
-    <wire from="(870,250)" to="(870,260)"/>
-    <wire from="(870,250)" to="(940,250)"/>
-    <wire from="(870,270)" to="(870,310)"/>
+    <wire from="(740,200)" to="(740,240)"/>
+    <wire from="(740,240)" to="(750,240)"/>
+    <wire from="(850,250)" to="(940,250)"/>
+    <wire from="(850,300)" to="(870,300)"/>
+    <wire from="(870,300)" to="(870,310)"/>
     <wire from="(870,310)" to="(940,310)"/>
     <wire from="(940,240)" to="(940,250)"/>
     <wire from="(940,250)" to="(1010,250)"/>
@@ -8025,7 +8112,7 @@
       <a name="radix" val="16"/>
     </comp>
     <comp loc="(1070,290)" name="ALU"/>
-    <comp loc="(850,260)" name="RegisterFile"/>
+    <comp loc="(850,250)" name="RegisterFile"/>
     <wire from="(1040,110)" to="(1040,240)"/>
     <wire from="(1070,270)" to="(1130,270)"/>
     <wire from="(1070,290)" to="(1090,290)"/>
@@ -8036,22 +8123,22 @@
     <wire from="(630,360)" to="(690,360)"/>
     <wire from="(650,110)" to="(1040,110)"/>
     <wire from="(650,240)" to="(670,240)"/>
-    <wire from="(650,280)" to="(750,280)"/>
-    <wire from="(650,320)" to="(660,320)"/>
-    <wire from="(660,290)" to="(660,320)"/>
-    <wire from="(660,290)" to="(750,290)"/>
-    <wire from="(670,240)" to="(670,270)"/>
+    <wire from="(650,280)" to="(670,280)"/>
+    <wire from="(650,320)" to="(680,320)"/>
+    <wire from="(670,240)" to="(670,260)"/>
+    <wire from="(670,260)" to="(750,260)"/>
+    <wire from="(670,270)" to="(670,280)"/>
     <wire from="(670,270)" to="(750,270)"/>
+    <wire from="(680,280)" to="(680,320)"/>
+    <wire from="(680,280)" to="(750,280)"/>
     <wire from="(690,300)" to="(690,360)"/>
     <wire from="(690,300)" to="(750,300)"/>
     <wire from="(730,310)" to="(730,380)"/>
     <wire from="(730,310)" to="(750,310)"/>
     <wire from="(730,380)" to="(940,380)"/>
-    <wire from="(850,260)" to="(870,260)"/>
-    <wire from="(850,270)" to="(870,270)"/>
-    <wire from="(870,250)" to="(870,260)"/>
-    <wire from="(870,250)" to="(940,250)"/>
-    <wire from="(870,270)" to="(870,310)"/>
+    <wire from="(850,250)" to="(940,250)"/>
+    <wire from="(850,300)" to="(870,300)"/>
+    <wire from="(870,300)" to="(870,310)"/>
     <wire from="(870,310)" to="(940,310)"/>
     <wire from="(940,240)" to="(940,250)"/>
     <wire from="(940,250)" to="(1010,250)"/>

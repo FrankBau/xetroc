@@ -28,29 +28,29 @@ struct alu_flags_t {
 } alu_flags;
 
 typedef enum {
-    ALU_OP_ADD,     // adds
-    ALU_OP_SUB,     // subs
-    ALU_OP_AND,     // ands
-    ALU_OP_EOR,     // eors
-    ALU_OP_LSL,     // logical shift left
-    ALU_OP_LSR,     // logical shift right
-    ALU_OP_ASR,     // arithmetic shift right
-    ALU_OP_ADC,     // add with carry
-    ALU_OP_SBC,     // subtract with carry
-    ALU_OP_ROR,     // rotate right
-    ALU_OP_TST,     // bitwise AND, sets flags only
-    ALU_OP_NEG,     // negate (0 - Rm)
-    ALU_OP_CMP,     // compare (Rn - Rm), sets flags only
-    ALU_OP_CMN,     // compare negative (Rn + Rm), sets flags only
-    ALU_OP_ORR,     // bitwise OR
-    ALU_OP_MUL,     // multiply
-    ALU_OP_BIC,     // bit clear (Rn & ~Rm)
-    ALU_OP_MVN      // bitwise NOT
+    ALU_OP_AND,     // AND Rd, Rm        — Thumb ALU opcode 0000
+    ALU_OP_EOR,     // EOR Rd, Rm        — Thumb ALU opcode 0001
+    ALU_OP_LSL,     // LSL Rd, Rm        — Thumb ALU opcode 0010
+    ALU_OP_LSR,     // LSR Rd, Rm        — Thumb ALU opcode 0011
+    ALU_OP_ASR,     // ASR Rd, Rm        — Thumb ALU opcode 0100
+    ALU_OP_ADC,     // ADC Rd, Rm        — Thumb ALU opcode 0101
+    ALU_OP_SBC,     // SBC Rd, Rm        — Thumb ALU opcode 0110
+    ALU_OP_ROR,     // ROR Rd, Rm        — Thumb ALU opcode 0111 (RRX if immediate shift == 0)
+    ALU_OP_TST,     // TST Rn, Rm        — Thumb ALU opcode 1000 (flags only, no result)
+    ALU_OP_NEG,     // NEG Rd, Rm        — Thumb ALU opcode 1001 (alias for RSBS Rd, Rm, #0)
+    ALU_OP_CMP,     // CMP Rn, Rm        — Thumb ALU opcode 1010 (flags only, no result)
+    ALU_OP_CMN,     // CMN Rn, Rm        — Thumb ALU opcode 1011 (flags only, no result)
+    ALU_OP_ORR,     // ORR Rd, Rm        — Thumb ALU opcode 1100
+    ALU_OP_MUL,     // MUL Rd, Rm        — Thumb ALU opcode 1101
+    ALU_OP_BIC,     // BIC Rd, Rm        — Thumb ALU opcode 1110
+    ALU_OP_MVN,     // MVN Rd, Rm        — Thumb ALU opcode 1111
+    // Extended ops (not part of Thumb ALU 4-bit field, used in other formats):
+    ALU_OP_ADD,     // ADD Rd, Rn, Rm    — Thumb format: multiple encodings (not ALU opcode field)
+    ALU_OP_SUB      // SUB Rd, Rn, Rm    — Thumb format: multiple encodings (not ALU opcode field)
 } alu_op_t;
 
+
 const char* alu_op_names[] = {
-    "add",   // ALU_OP_ADD
-    "sub",   // ALU_OP_SUB
     "and",   // ALU_OP_AND
     "eor",   // ALU_OP_EOR
     "lsl",   // ALU_OP_LSL
@@ -67,6 +67,8 @@ const char* alu_op_names[] = {
     "mul",   // ALU_OP_MUL
     "bic",   // ALU_OP_BIC
     "mvn"    // ALU_OP_MVN
+    "add",   // ALU_OP_ADD
+    "sub",   // ALU_OP_SUB
 };
 
 #define FLASH_BASE  0x08000000
@@ -110,12 +112,14 @@ static inline uint32_t zero_extend_u(uint32_t v, unsigned width) {
     return v & mask;
 }
 
+uint32_t alu(uint32_t a, uint32_t b, alu_op_t op, bool update_flags)
+{
+    if(op==ALU_OP_LSL || op==ALU_OP_LSR || op==ALU_OP_ASR || op==ALU_OP_ROR) {
+        b = b & 0x1F; // treat shift amounts modulo 32
+    }
 
-uint32_t alu(uint32_t a, uint32_t b, alu_op_t op, bool update_flags) {
     uint32_t result = 0;
     switch(op) {
-        case ALU_OP_ADD: result = a + b; break;
-        case ALU_OP_SUB: result = a - b; break;
         case ALU_OP_AND: result = a & b; break;
         case ALU_OP_EOR: result = a ^ b; break;
         case ALU_OP_LSL: result = a << b; break;
@@ -124,37 +128,68 @@ uint32_t alu(uint32_t a, uint32_t b, alu_op_t op, bool update_flags) {
         case ALU_OP_ADC: result = a + b + alu_flags.C; break;
         case ALU_OP_SBC: result = a - b - (1 - alu_flags.C); break;
         case ALU_OP_ROR: result = (a >> b) | (a << (32 - b)); break;
-        case ALU_OP_NEG: result = 0 - b; break;
+        case ALU_OP_TST: result = a & b; break; // result not used
+        case ALU_OP_NEG: a = 0; result = a - b; break; // == RSBS Rd, Rn, #0
+        case ALU_OP_CMP: result = a - b; break; // result not used
+        case ALU_OP_CMN: result = a + b; break; // result not used
         case ALU_OP_ORR: result = a | b; break;
         case ALU_OP_MUL: result = a * b; break;
         case ALU_OP_BIC: result = a & ~b; break;
         case ALU_OP_MVN: result = ~b; break;
-        case ALU_OP_TST: result = a & b; break;
-        case ALU_OP_CMP: result = a - b; break;
-        case ALU_OP_CMN: result = a + b; break;
+        case ALU_OP_ADD: result = a + b; break; // alu_flags.C = 0; op = ALU_OP_ADC;
+        case ALU_OP_SUB: result = a - b; break; // alu_flags.C = 1; op = ALU_OP_SBC;
     }
+
+    // todo: special case handling
+    // ROR Rd, Rm → rotates Rd by the value in Rm
+    // ROR Rd, #imm → rotates Rd by an immediate
+    // Special case: ROR Rd, #0 is interpreted as RRX, not a no-op
 
     if(update_flags) {
-        alu_flags.N = (result >> 31) & 1;   // result negative
-        alu_flags.Z = (result == 0);        // result zero
+        alu_flags.N = (result >> 31) & 1;
+        alu_flags.Z = (result == 0);
 
-        if(op==ALU_OP_ADD || op==ALU_OP_ADC) {
-            // Carry/Borrow: ADD sets if carry out, SUB sets if no borrow
-            alu_flags.C = (result < a);
+        switch(op) {
+            case ALU_OP_ADD:
+            case ALU_OP_ADC:
+            case ALU_OP_CMN:
+                alu_flags.C = (result < a);
+                alu_flags.V = (((~(a ^ b)) & (a ^ result)) >> 31) & 1;
+                break;
 
-            // Overflow: ADD sets if same-sign inputs yield opposite-sign result
-            alu_flags.V = (((~(a ^ b)) & (a ^ result)) >> 31) & 1;
-        }
+            case ALU_OP_SUB:
+            case ALU_OP_SBC:
+            case ALU_OP_CMP:
+            case ALU_OP_NEG:
+                alu_flags.C = a >= b;
+                alu_flags.V = (((a ^ b) & (a ^ result)) >> 31) & 1;
+                break;
 
-        if(op==ALU_OP_SUB || op==ALU_OP_SBC || op==ALU_OP_CMP || op==ALU_OP_CMN) {
-            // Carry/Borrow: ADD sets if carry out, SUB sets if no borrow
-            alu_flags.C = a >= b;
+            case ALU_OP_LSL:
+                if(b != 0)
+                    alu_flags.C = (a >> (32 - b)) & 1;
+                break;
 
-            // Overflow: SUB sets if opposite-sign inputs yield wrong-sign result
-            alu_flags.V = (((a ^ b) & (a ^ result)) >> 31) & 1;
+            case ALU_OP_LSR:
+                if(b != 0)
+                    alu_flags.C = (a >> (b - 1)) & 1;
+                break;
+
+            case ALU_OP_ASR:
+                if(b != 0)
+                    alu_flags.C = ((int32_t)a >> (b - 1)) & 1;
+                break;
+
+            case ALU_OP_ROR:
+                if(b != 0)
+                    alu_flags.C = (a >> (b - 1)) & 1;
+                break;
+
+            // All other ops: no C/V updates
+            default:
+                break;
         }
     }
-
     return result;
 }
 
@@ -206,7 +241,6 @@ int main(int argc, char *argv[])
     reg[SP] = RAM_BASE;
 
     for(;;) {
-
         // fetch
         bits pc = reg[PC];  // snapshot current PC
         bits addr = (pc - FLASH_BASE) >> 1; // byte address, relative to base

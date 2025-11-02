@@ -14,19 +14,22 @@ It supports only a minimal set of instructions:
 
 Besides the CPU, the computer has a 64k 16-bit code ROM and a 64kB 32-bit data RAM.
 
-The complete design is contained in the `main.circ` file, which is used with the  [logisim-evolution](https://github.com/logisim-evolution/logisim-evolution) software. Version 3.9 was used for testing.
+The complete design is contained in the `xetroc.circ` file, which is used with the  [logisim-evolution](https://github.com/logisim-evolution/logisim-evolution) software. 
+Version 4.0 and formerly 3.9 were used for testing.
 
 Sample programs are contained in the `*_rom.txt`files which can be loaded into the ROM and executed in a logisim-evolution simulation.
 
 The circuit is based on the Single Cycle Processor in https://github.com/dgsmith1988/Logisim-ARM-Processors which in turn is based on the book
 [Digital Design and Computer Architecture - ARM Edition](https://pages.hmc.edu/harris/ddca/ddcaarm.html) by Sarah L. Harris and David Harris.
 
-Signal and component names and the overall structure is very close to the book. 
+Signal and component names and the overall structure is kept close to the book. 
 The main difference is the Instruction Decoder which is for 16-bit instructions, not 32-bit instructions.
-For instruction encoding and details see the Arm online documentation [16-bit Thumb instruction encoding](https://developer.arm.com/documentation/ddi0406/b/Application-Level-Architecture/Thumb-Instruction-Set-Encoding/16-bit-Thumb-instruction-encoding).
+For instruction encoding and details see the Arm online documentation 
+[16-bit Thumb instruction encoding](https://developer.arm.com/documentation/ddi0406/b/Application-Level-Architecture/Thumb-Instruction-Set-Encoding/16-bit-Thumb-instruction-encoding).
 
 The Instruction Decoder in the Control Unit was generated from the `Instruction_Decoder_TruthTable.txt` 
 truth table description which makes it easier to understand and modify. 
+(Window > Combinatorial Analysis > Import Table, ignore warnings, Optimize Minterms, Export Table)
 There are no HDL components involved.
 
 ## Limitations

@@ -262,7 +262,7 @@ int main(int argc, char *argv[])
             bits a = reg[SP];
             bits b = zero_extend_u(i, 8) << 2;  // scale by 4 for 32-bit ldr/str
             bits r = alu(a, b, ALU_OP_ADD, false);
-            if(trace & 1) printf("%s r%d, [sp, #%d]\n", is_ldr ? "ldr" : "str", t, i);
+            if(trace & 1) printf("%s r%d, [sp, #%d]\n", is_ldr ? "ldr" : "str", t, b);
             bits addr = (r - RAM_BASE) >> 2;    // our RAM has 32-bit elements
             if(is_ldr) {
                 reg[t] = ram[addr];

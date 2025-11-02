@@ -7,15 +7,15 @@
 // gcc -std=c23 -pedantic -Wall xetroc.c -o xetroc.exe
 
 
-typedef uint32_t bits;   // a general type for holding bits 
-typedef uint32_t word; 
-typedef uint16_t halfword;
-typedef  uint8_t byte;
+typedef uint32_t bits;      // a general type for holding bits 
+typedef uint32_t word;      // 32-bit machine word
+typedef uint16_t halfword;  
+typedef uint8_t byte;
 
 // trace bit 0: printf decoded instructions
 const bits trace = 0b1;
 
-bits reg[16];   // registers
+word reg[16];   // registers
 
 #define SP  14
 #define PC  15
@@ -43,7 +43,7 @@ typedef enum {
     ALU_OP_ORR,     // ORR Rd, Rm        — Thumb ALU opcode 1100
     ALU_OP_MUL,     // MUL Rd, Rm        — Thumb ALU opcode 1101
     ALU_OP_BIC,     // BIC Rd, Rm        — Thumb ALU opcode 1110
-    ALU_OP_MVN,     // MVN Rd, Rm        — Thumb ALU opcode 1111
+    ALU_OP_MVN,     // MVN Rd, Rm        — Thumb ALU opcode 1111 (bitwise NOT)
     // Extended ops (not part of Thumb ALU 4-bit field, used in other formats):
     ALU_OP_ADD,     // ADD Rd, Rn, Rm    — Thumb format: multiple encodings (not ALU opcode field)
     ALU_OP_SUB      // SUB Rd, Rn, Rm    — Thumb format: multiple encodings (not ALU opcode field)
@@ -86,13 +86,13 @@ const uint16_t flash[FLASH_SIZE] = { 0x2000, 0x9000, 0x2001, 0x9001, 0x9800, 0x9
 // data memory, we use uint32_t here for simplicity
 uint32_t ram[RAM_SIZE];
 
-static inline uint32_t bits_extract(uint32_t x, unsigned hi, unsigned lo) {
+static inline word bits_extract(word x, unsigned hi, unsigned lo) {
     unsigned w = hi - lo + 1;
     if (w >= 32) return x >> lo;
     return (x >> lo) & ((1u << w) - 1u);
 }
 
-static inline int32_t sign_extend_u(uint32_t v, unsigned width) {
+static inline int32_t sign_extend_u(word v, unsigned width) {
     assert((0u < width) && (width < 32u));
     uint32_t mask = (1u << width) - 1u;
     uint32_t raw = v & mask;
@@ -105,20 +105,19 @@ static inline int32_t sign_extend_u(uint32_t v, unsigned width) {
     }
 }
 
-/* zero-extend an unsigned value `v` that is `width` bits wide into uint32_t */
-static inline uint32_t zero_extend_u(uint32_t v, unsigned width) {
+static inline uint32_t zero_extend_u(word v, unsigned width) {
     assert((0u < width) && (width < 32u));
     uint32_t mask = (1u << width) - 1u;
     return v & mask;
 }
 
-uint32_t alu(uint32_t a, uint32_t b, alu_op_t op, bool update_flags)
+word alu(word a, word b, alu_op_t op, bool update_flags)
 {
     if(op==ALU_OP_LSL || op==ALU_OP_LSR || op==ALU_OP_ASR || op==ALU_OP_ROR) {
         b = b & 0x1F; // treat shift amounts modulo 32
     }
 
-    uint32_t result = 0;
+    word result = 0;
     switch(op) {
         case ALU_OP_AND: result = a & b; break;
         case ALU_OP_EOR: result = a ^ b; break;
@@ -193,7 +192,7 @@ uint32_t alu(uint32_t a, uint32_t b, alu_op_t op, bool update_flags)
     return result;
 }
 
-bool should_branch(uint8_t cc, struct alu_flags_t f) {
+bool should_branch(bits cc, struct alu_flags_t f) {
     switch (cc & 0xF) {
         case 0x0: return f.Z == 1;                        // EQ
         case 0x1: return f.Z == 0;                        // NE
@@ -242,13 +241,13 @@ int main(int argc, char *argv[])
 
     for(;;) {
         // fetch
-        bits pc = reg[PC];  // snapshot current PC
-        bits addr = (pc - FLASH_BASE) >> 1; // byte address, relative to base
-        bits ir = flash[addr];
-        bits next_pc = pc + 2;  // default: advance to next instruction
+        word pc = reg[PC];  // snapshot current PC
+        word addr = (pc - FLASH_BASE) >> 1; // byte address, relative to base
+        word ir = flash[addr];
+        word next_pc = pc + 2;  // default: advance to next instruction
 
         // decode and execute
-        bits group = bits_extract(ir, 15,12); // instrcution group
+        bits group = bits_extract(ir, 15,12); // instruction group
         if(group == 0b0000) {         // MOVS <Rd>,<Rm>
             bits d = bits_extract(ir, 2, 0);
             bits n = bits_extract(ir, 5, 3);
@@ -297,7 +296,7 @@ int main(int argc, char *argv[])
             bits b = zero_extend_u(i, 8) << 2;  // scale by 4 for 32-bit ldr/str
             bits r = alu(a, b, ALU_OP_ADD, false);
             if(trace & 1) printf("%s r%d, [sp, #%d]\n", is_ldr ? "ldr" : "str", t, b);
-            bits addr = (r - RAM_BASE) >> 2;    // our RAM has 32-bit elements
+            word addr = (r - RAM_BASE) >> 2;    // our RAM has 32-bit elements
             if(is_ldr) {
                 reg[t] = ram[addr];
             } else {
@@ -306,18 +305,18 @@ int main(int argc, char *argv[])
 
         } else if(group == 0b1101) { // Bcc #<simm8>
             bits cc = bits_extract(ir, 11, 8);
-            bits i =  bits_extract(ir, 7, 0);;
+            bits i =  bits_extract(ir, 7, 0);
             int32_t simm8 = sign_extend_u(i, 8);
             if(trace & 1) printf("b%s %d\n", Bcc_names[cc], simm8);
             if(should_branch(cc, alu_flags)) {
-                next_pc = pc + 4 + (sizeof(halfword) * simm8);
+                next_pc = pc + 4 + (2 * simm8); // offset in bytes
             } 
 
         } else if(group == 0b1110) { // B #<simm11>
-            bits i =  bits_extract(ir, 10, 0);;
+            bits i =  bits_extract(ir, 10, 0);
             int32_t simm11 = sign_extend_u(i, 11);
             if(trace & 1) printf("b %d\n", simm11);
-            next_pc = pc + 4 + (sizeof(halfword) * simm11);
+            next_pc = pc + 4 + (2 * simm11); // offset in bytes
             if(pc == next_pc) {
                 printf("endless loop detected -> halting simulation\n");
                 return 0;

@@ -18,7 +18,8 @@ const bits trace = 0b1;
 
 word reg[16];   // registers
 
-#define SP  14
+#define SP  13
+#define LR  14
 #define PC  15
 
 struct alu_flags_t {
@@ -67,12 +68,12 @@ const char* alu_op_names[] = {
     "orr",   // ALU_OP_ORR
     "mul",   // ALU_OP_MUL
     "bic",   // ALU_OP_BIC
-    "mvn"    // ALU_OP_MVN
+    "mvn",   // ALU_OP_MVN
     "add",   // ALU_OP_ADD
     "sub",   // ALU_OP_SUB
 };
 
-#define FLASH_BASE  0x08000000
+#define FLASH_BASE  0x00000000
 #define FLASH_SIZE        1024
 #define   RAM_BASE  0x20000000
 #define   RAM_SIZE        1024
@@ -246,7 +247,7 @@ int main(int argc, char *argv[])
         if(group == 0b0000) {         // MOVS <Rd>,<Rm>
             bits d = bits_extract(ir, 2, 0);
             bits n = bits_extract(ir, 5, 3);
-            if(trace & 1) printf("movs r%d, r%d\n", d, n);
+            if(trace & 1) printf("0x%04x: movs r%d, r%d\n", pc, d, n);
             bits a = reg[n];
             bits b = 0;
             bits r = alu(a, b, ALU_OP_ORR, true); // triggers flag update
@@ -257,7 +258,7 @@ int main(int argc, char *argv[])
             bits n = bits_extract(ir, 5, 3);
             bits m = bits_extract(ir, 8, 6);
             alu_op_t alu_op = bits_extract(ir, 9, 9) ? ALU_OP_SUB : ALU_OP_ADD;
-            if(trace & 1) printf("%ss r%d, r%d, r%d\n", alu_op_names[alu_op], d, n, m);
+            if(trace & 1) printf("0x%04x\t%ss r%d, r%d, r%d\n", pc, alu_op_names[alu_op], d, n, m);
             bits a = reg[n];
             bits b = reg[m];
             bits r = alu(a, b, alu_op, true);
@@ -266,7 +267,7 @@ int main(int argc, char *argv[])
         } else if(group == 0b0010) { // MOVS <Rd>, #<imm8>
             bits d = bits_extract(ir, 10, 8);
             bits i = bits_extract(ir, 7, 0);
-            if(trace & 1) printf("movs r%d, #%d\n", d, i);
+            if(trace & 1) printf("0x%04x\tmovs r%d, #%d\n", pc, d, i);
             bits a = 0;
             bits b = zero_extend_u(i, 8);
             bits r = alu(a, b, ALU_OP_ORR, true); // triggers flag update
@@ -277,7 +278,7 @@ int main(int argc, char *argv[])
             bits n = bits_extract(ir, 10, 8);
             bits i = bits_extract(ir,  7, 0);
             alu_op_t alu_op = bits_extract(ir, 11, 11) ? ALU_OP_SUB : ALU_OP_ADD;
-            if(trace & 1) printf("%ss r%d, r%d, #%d\n", alu_op_names[alu_op], d, n, i);
+            if(trace & 1) printf("0x%04x\t%ss r%d, r%d, #%d\n", pc, alu_op_names[alu_op], d, n, i);
             bits a = reg[n];
             bits b = zero_extend_u(i, 8);
             bits r = alu(a, b, alu_op, true);
@@ -290,7 +291,7 @@ int main(int argc, char *argv[])
             bits a = reg[SP];
             bits b = zero_extend_u(i, 8) << 2;  // scale by 4 for 32-bit ldr/str
             bits r = alu(a, b, ALU_OP_ADD, false);
-            if(trace & 1) printf("%s r%d, [sp, #%d]\n", is_ldr ? "ldr" : "str", t, b);
+            if(trace & 1) printf("0x%04x\t%s r%d, [sp, #%d]\n", pc, is_ldr ? "ldr" : "str", t, b);
             word addr = (r - RAM_BASE) >> 2;    // our RAM has 32-bit elements
             if(is_ldr) {
                 reg[t] = ram[addr];
@@ -302,20 +303,23 @@ int main(int argc, char *argv[])
             bits cc = bits_extract(ir, 11, 8);
             bits i =  bits_extract(ir, 7, 0);
             int32_t simm8 = sign_extend_u(i, 8);
-            if(trace & 1) printf("b%s . #%+d\n", Bcc_names[cc], simm8);
-            if(should_branch(cc, alu_flags)) {
-                next_pc = pc + 4 + (2 * simm8); // offset in bytes
+            bits target_pc = pc + 4 + (2 * simm8); // offset in bytes
+            bool is_taken = should_branch(cc, alu_flags);
+            if(trace & 1) printf("0x%04x\tb%s  %+d          ; 0x%04x (%s)\n", pc, Bcc_names[cc], simm8, target_pc, is_taken ? "taken" : "not taken");
+            if(is_taken) {
+                next_pc = target_pc;
             } 
 
         } else if(group == 0b1110) { // B #<simm11>
             bits i =  bits_extract(ir, 10, 0);
             int32_t simm11 = sign_extend_u(i, 11);
-            if(trace & 1) printf("b   . #%+d\n", simm11);
-            next_pc = pc + 4 + (2 * simm11); // offset in bytes
-            if(pc == next_pc) {
+            bits target_pc = pc + 4 + (2 * simm11); // offset in bytes
+            if(trace & 1) printf("0x%04x\tb    %+d          ; 0x%04x\n", pc, simm11, target_pc);
+            if(pc == target_pc) {
                 printf("endless loop detected -> halting simulation\n");
                 return 0;
             }
+            next_pc = target_pc; // unconditionally
 
         } else {
             printf("illegal instruction 0x%04x\n", ir);

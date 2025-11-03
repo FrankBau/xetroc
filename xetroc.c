@@ -7,10 +7,11 @@
 // gcc -std=c23 -pedantic -Wall xetroc.c -o xetroc.exe
 
 
-typedef uint32_t bits;      // a general type for holding bits 
+typedef uint32_t bits;      // a general type for holding some bits
+
 typedef uint32_t word;      // 32-bit machine word
-typedef uint16_t halfword;  
-typedef uint8_t byte;
+typedef uint16_t halfword;  // 16-bit half word 
+typedef uint8_t byte;       // 8-bit
 
 // trace bit 0: printf decoded instructions
 const bits trace = 0b1;
@@ -76,15 +77,14 @@ const char* alu_op_names[] = {
 #define   RAM_BASE  0x20000000
 #define   RAM_SIZE        1024
 
-// instruction memory, we use uint16_t here for simplicity
+// instruction memory, we support only halfword access here for simplicity, real hardware can be accessed in more ways.
+// const halfword flash[FLASH_SIZE] = { 0x2156, 0x3203, 0x3b10, 0x000c, 0x18d5, 0x1ace, 0x9401, 0x9f01, 0xd0fe, 0xe7fe };                   // all instruction types 
+// const halfword flash[FLASH_SIZE] = { 0x2026, 0x212a, 0x2200, 0x000b, 0xd002, 0x1812, 0x3b01, 0xe7fb, 0xe7fe };                           // multiply by add 38 * 42 = 1596
+//const halfword flash[FLASH_SIZE] = { 0x2000, 0x9000, 0x2001, 0x9001, 0x9800, 0x9901, 0x1842, 0xd402, 0x9100, 0x9201, 0xe7f8, 0xe7fe };      // fibonacci (using RAM)
+const halfword flash[FLASH_SIZE] = { 0x20ee, 0x2193, 0x1e0a, 0xd005, 0x1a42, 0xd801, 0x1a09, 0xe7f9, 0x1a40, 0xe7f7, 0xe7fe };           // gcd(238,147) = 7
 
-// const uint16_t flash[FLASH_SIZE] = { 0x2156, 0x3203, 0x3b10, 0x000c, 0x18d5, 0x1ace, 0x9401, 0x9f01, 0xd0fe, 0xe7fe };                   // all instruction types 
-// const uint16_t flash[FLASH_SIZE] = { 0x2026, 0x212a, 0x2200, 0x000b, 0xd002, 0x1812, 0x3b01, 0xe7fb, 0xe7fe };                           // multiply by adding 38 * 42 = 1596
-// const uint16_t flash[FLASH_SIZE] = { 0x20ee, 0x2193, 0x1e0a, 0xd005, 0x1a42, 0xd801, 0x1a09, 0xe7f9, 0x1a40, 0xe7f7, 0xe7fe };           // gcd(238,147) = 7
-const uint16_t flash[FLASH_SIZE] = { 0x2000, 0x9000, 0x2001, 0x9001, 0x9800, 0x9901, 0x1842, 0xd402, 0x9100, 0x9201, 0xe7f8, 0xe7fe };   // fibonacci
-
-// data memory, we use uint32_t here for simplicity
-uint32_t ram[RAM_SIZE];
+// data memory, we support only word access here for simplicity, real hardware can be accessed in more ways.
+word ram[RAM_SIZE];
 
 static inline word bits_extract(word x, unsigned hi, unsigned lo) {
     unsigned w = hi - lo + 1;
@@ -138,11 +138,6 @@ word alu(word a, word b, alu_op_t op, bool update_flags)
         case ALU_OP_ADD: result = a + b; break; // alu_flags.C = 0; op = ALU_OP_ADC;
         case ALU_OP_SUB: result = a - b; break; // alu_flags.C = 1; op = ALU_OP_SBC;
     }
-
-    // todo: special case handling
-    // ROR Rd, Rm → rotates Rd by the value in Rm
-    // ROR Rd, #imm → rotates Rd by an immediate
-    // Special case: ROR Rd, #0 is interpreted as RRX, not a no-op
 
     if(update_flags) {
         alu_flags.N = (result >> 31) & 1;
@@ -307,7 +302,7 @@ int main(int argc, char *argv[])
             bits cc = bits_extract(ir, 11, 8);
             bits i =  bits_extract(ir, 7, 0);
             int32_t simm8 = sign_extend_u(i, 8);
-            if(trace & 1) printf("b%s %d\n", Bcc_names[cc], simm8);
+            if(trace & 1) printf("b%s . #%+d\n", Bcc_names[cc], simm8);
             if(should_branch(cc, alu_flags)) {
                 next_pc = pc + 4 + (2 * simm8); // offset in bytes
             } 
@@ -315,7 +310,7 @@ int main(int argc, char *argv[])
         } else if(group == 0b1110) { // B #<simm11>
             bits i =  bits_extract(ir, 10, 0);
             int32_t simm11 = sign_extend_u(i, 11);
-            if(trace & 1) printf("b %d\n", simm11);
+            if(trace & 1) printf("b   . #%+d\n", simm11);
             next_pc = pc + 4 + (2 * simm11); // offset in bytes
             if(pc == next_pc) {
                 printf("endless loop detected -> halting simulation\n");

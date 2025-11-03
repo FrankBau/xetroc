@@ -43,3 +43,7 @@ The single cycle design is a simplification which is not aimed at mimicking any 
 - the Control Unit decodes only a subset of instruction formats.
 
 At the moment, the goal is to keep the design simple, not to create a fully blown model. If you find a bug or have a suggestion, feel free to open an issue or submit a pull request. 
+
+# More Realistic Simulations in C
+- https://github.com/dwelch67/thumbulator
+- https://github.com/ultraembedded/armv6m-sim.git

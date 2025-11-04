@@ -4,23 +4,23 @@
 #include <assert.h>
 
 // binary literals like 0b0000 need C23
-// gcc -std=c23 -pedantic -Wall xetroc.c -o xetroc.exe
-
-
-typedef uint32_t bits;      // a general type for holding some bits
+// gcc -Og -std=c23 -pedantic -Wall -Wextra xetroc.c -o xetroc.exe
 
 typedef uint32_t word;      // 32-bit machine word
 typedef uint16_t halfword;  // 16-bit half word 
 typedef uint8_t byte;       // 8-bit
 
-// trace bit 0: printf decoded instructions
-const bits trace = 0b1;
+typedef enum {
+    ALU_OP_ADD,     // ADD Rd, Rn, Rm    — Thumb format: multiple encodings (not ALU opcode field)
+    ALU_OP_SUB      // SUB Rd, Rn, Rm    — Thumb format: multiple encodings (not ALU opcode field)
+    // ...
+} alu_op_t;
 
-word reg[16];   // registers
-
-#define SP  13
-#define LR  14
-#define PC  15
+const char* alu_op_names[] = {
+    "add",   // ALU_OP_ADD
+    "sub",   // ALU_OP_SUB
+    // ...
+};
 
 struct alu_flags_t {
     bool N;
@@ -29,166 +29,88 @@ struct alu_flags_t {
     bool V;
 } alu_flags;
 
-typedef enum {
-    ALU_OP_AND,     // AND Rd, Rm        — Thumb ALU opcode 0000
-    ALU_OP_EOR,     // EOR Rd, Rm        — Thumb ALU opcode 0001
-    ALU_OP_LSL,     // LSL Rd, Rm        — Thumb ALU opcode 0010
-    ALU_OP_LSR,     // LSR Rd, Rm        — Thumb ALU opcode 0011
-    ALU_OP_ASR,     // ASR Rd, Rm        — Thumb ALU opcode 0100
-    ALU_OP_ADC,     // ADC Rd, Rm        — Thumb ALU opcode 0101
-    ALU_OP_SBC,     // SBC Rd, Rm        — Thumb ALU opcode 0110
-    ALU_OP_ROR,     // ROR Rd, Rm        — Thumb ALU opcode 0111 (RRX if immediate shift == 0)
-    ALU_OP_TST,     // TST Rn, Rm        — Thumb ALU opcode 1000 (flags only, no result)
-    ALU_OP_NEG,     // NEG Rd, Rm        — Thumb ALU opcode 1001 (alias for RSBS Rd, Rm, #0)
-    ALU_OP_CMP,     // CMP Rn, Rm        — Thumb ALU opcode 1010 (flags only, no result)
-    ALU_OP_CMN,     // CMN Rn, Rm        — Thumb ALU opcode 1011 (flags only, no result)
-    ALU_OP_ORR,     // ORR Rd, Rm        — Thumb ALU opcode 1100
-    ALU_OP_MUL,     // MUL Rd, Rm        — Thumb ALU opcode 1101
-    ALU_OP_BIC,     // BIC Rd, Rm        — Thumb ALU opcode 1110
-    ALU_OP_MVN,     // MVN Rd, Rm        — Thumb ALU opcode 1111 (bitwise NOT)
-    // Extended ops (not part of Thumb ALU 4-bit field, used in other formats):
-    ALU_OP_ADD,     // ADD Rd, Rn, Rm    — Thumb format: multiple encodings (not ALU opcode field)
-    ALU_OP_SUB      // SUB Rd, Rn, Rm    — Thumb format: multiple encodings (not ALU opcode field)
-} alu_op_t;
-
-
-const char* alu_op_names[] = {
-    "and",   // ALU_OP_AND
-    "eor",   // ALU_OP_EOR
-    "lsl",   // ALU_OP_LSL
-    "lsr",   // ALU_OP_LSR
-    "asr",   // ALU_OP_ASR
-    "adc",   // ALU_OP_ADC
-    "sbc",   // ALU_OP_SBC
-    "ror",   // ALU_OP_ROR
-    "tst",   // ALU_OP_TST
-    "neg",   // ALU_OP_NEG
-    "cmp",   // ALU_OP_CMP
-    "cmn",   // ALU_OP_CMN
-    "orr",   // ALU_OP_ORR
-    "mul",   // ALU_OP_MUL
-    "bic",   // ALU_OP_BIC
-    "mvn",   // ALU_OP_MVN
-    "add",   // ALU_OP_ADD
-    "sub",   // ALU_OP_SUB
-};
-
 #define FLASH_BASE  0x00000000
 #define FLASH_SIZE        1024
 #define   RAM_BASE  0x20000000
 #define   RAM_SIZE        1024
 
+// the hardware uses absolute 32-bit byte addresses
+// but the simulation uses halfword rsp. word addresses 
+// relative to the memory base address
+#define FLASH(addr) (flash[((addr) - FLASH_BASE) >> 1])
+#define RAM(addr)   (  ram[((addr) -   RAM_BASE) >> 2])
+
 // instruction memory, we support only halfword access here for simplicity, real hardware can be accessed in more ways.
 // const halfword flash[FLASH_SIZE] = { 0x2156, 0x3203, 0x3b10, 0x000c, 0x18d5, 0x1ace, 0x9401, 0x9f01, 0xd0fe, 0xe7fe };                   // all instruction types 
 // const halfword flash[FLASH_SIZE] = { 0x2026, 0x212a, 0x2200, 0x000b, 0xd002, 0x1812, 0x3b01, 0xe7fb, 0xe7fe };                           // multiply by add 38 * 42 = 1596
-//const halfword flash[FLASH_SIZE] = { 0x2000, 0x9000, 0x2001, 0x9001, 0x9800, 0x9901, 0x1842, 0xd402, 0x9100, 0x9201, 0xe7f8, 0xe7fe };      // fibonacci (using RAM)
-const halfword flash[FLASH_SIZE] = { 0x20ee, 0x2193, 0x1e0a, 0xd005, 0x1a42, 0xd801, 0x1a09, 0xe7f9, 0x1a40, 0xe7f7, 0xe7fe };           // gcd(238,147) = 7
+const halfword flash[FLASH_SIZE] = { 0x2000, 0x9000, 0x2001, 0x9001, 0x9800, 0x9901, 0x1842, 0xd402, 0x9100, 0x9201, 0xe7f8, 0xe7fe };      // fibonacci (using RAM)
+// const halfword flash[FLASH_SIZE] = { 0x20ee, 0x2193, 0x1e0a, 0xd005, 0x1a42, 0xd801, 0x1a09, 0xe7f9, 0x1a40, 0xe7f7, 0xe7fe };           // gcd(238,147) = 7
 
 // data memory, we support only word access here for simplicity, real hardware can be accessed in more ways.
 word ram[RAM_SIZE];
 
+word reg[16];   // registers
+
+#define SP  13
+#define LR  14
+#define PC  15
+
 static inline word bits_extract(word x, unsigned hi, unsigned lo) {
+    assert((lo <= hi) && (hi < 32u));
     unsigned w = hi - lo + 1;
-    if (w >= 32) return x >> lo;
     return (x >> lo) & ((1u << w) - 1u);
 }
 
-static inline int32_t sign_extend_u(word v, unsigned width) {
+static inline word zero_extend(word v, unsigned width) {
     assert((0u < width) && (width < 32u));
-    uint32_t mask = (1u << width) - 1u;
-    uint32_t raw = v & mask;
-    uint32_t sign_bit = 1u << (width - 1);
-    if (raw & sign_bit) {
-        /* negative: fill upper bits with 1 */
-        return (int32_t)(raw | ~mask);
-    } else {
-        return (int32_t)raw;
-    }
-}
-
-static inline uint32_t zero_extend_u(word v, unsigned width) {
-    assert((0u < width) && (width < 32u));
-    uint32_t mask = (1u << width) - 1u;
+    word mask = (1u << width) - 1u;
     return v & mask;
 }
 
-word alu(word a, word b, alu_op_t op, bool update_flags)
-{
-    if(op==ALU_OP_LSL || op==ALU_OP_LSR || op==ALU_OP_ASR || op==ALU_OP_ROR) {
-        b = b & 0x1F; // treat shift amounts modulo 32
-    }
+static inline word sign_extend(word v, unsigned width) {
+    assert((0u < width) && (width < 32u));
+    word sign = 1u << (width - 1);
+    word mask = (1u << width) - 1;
+    return (v & sign) ? (v | ~mask) : (v & mask);
+}
 
+// update_flags: 0: none 1: NZ 2: NZCV
+word alu(word a, word b, alu_op_t op, word update_flags)
+{
     word result = 0;
     switch(op) {
-        case ALU_OP_AND: result = a & b; break;
-        case ALU_OP_EOR: result = a ^ b; break;
-        case ALU_OP_LSL: result = a << b; break;
-        case ALU_OP_LSR: result = a >> b; break;
-        case ALU_OP_ASR: result = (int32_t)a >> b; break;
-        case ALU_OP_ADC: result = a + b + alu_flags.C; break;
-        case ALU_OP_SBC: result = a - b - (1 - alu_flags.C); break;
-        case ALU_OP_ROR: result = (a >> b) | (a << (32 - b)); break;
-        case ALU_OP_TST: result = a & b; break; // result not used
-        case ALU_OP_NEG: a = 0; result = a - b; break; // == RSBS Rd, Rn, #0
-        case ALU_OP_CMP: result = a - b; break; // result not used
-        case ALU_OP_CMN: result = a + b; break; // result not used
-        case ALU_OP_ORR: result = a | b; break;
-        case ALU_OP_MUL: result = a * b; break;
-        case ALU_OP_BIC: result = a & ~b; break;
-        case ALU_OP_MVN: result = ~b; break;
-        case ALU_OP_ADD: result = a + b; break; // alu_flags.C = 0; op = ALU_OP_ADC;
-        case ALU_OP_SUB: result = a - b; break; // alu_flags.C = 1; op = ALU_OP_SBC;
+        case ALU_OP_ADD: result = a + b; break;
+        case ALU_OP_SUB: result = a - b; break;
     }
 
-    if(update_flags) {
-        alu_flags.N = (result >> 31) & 1;
-        alu_flags.Z = (result == 0);
+    if(update_flags > 0) {
+        alu_flags.N = (result >> 31) & 1;       // negative
+        alu_flags.Z = (result == 0);            // zero
+    }
 
-        switch(op) {
-            case ALU_OP_ADD:
-            case ALU_OP_ADC:
-            case ALU_OP_CMN:
-                alu_flags.C = (result < a);
-                alu_flags.V = (((~(a ^ b)) & (a ^ result)) >> 31) & 1;
+    if(update_flags > 1) {
+        switch (op) {
+            case ALU_OP_ADD: {
+                alu_flags.C = (result < a);     // unsigned overflow (carry)
+                word xor_ab = a ^ b;
+                word xor_ar = a ^ result;
+                alu_flags.V = ((~xor_ab & xor_ar) >> 31) & 1; // signed overflow
                 break;
+            }
 
-            case ALU_OP_SUB:
-            case ALU_OP_SBC:
-            case ALU_OP_CMP:
-            case ALU_OP_NEG:
-                alu_flags.C = a >= b;
-                alu_flags.V = (((a ^ b) & (a ^ result)) >> 31) & 1;
+            case ALU_OP_SUB: {
+                alu_flags.C = (a >= b);         // no borrow
+                word xor_ab = a ^ b;
+                word xor_ar = a ^ result;
+                alu_flags.V = ((xor_ab & xor_ar) >> 31) & 1; // signed overflow
                 break;
-
-            case ALU_OP_LSL:
-                if(b != 0)
-                    alu_flags.C = (a >> (32 - b)) & 1;
-                break;
-
-            case ALU_OP_LSR:
-                if(b != 0)
-                    alu_flags.C = (a >> (b - 1)) & 1;
-                break;
-
-            case ALU_OP_ASR:
-                if(b != 0)
-                    alu_flags.C = ((int32_t)a >> (b - 1)) & 1;
-                break;
-
-            case ALU_OP_ROR:
-                if(b != 0)
-                    alu_flags.C = (a >> (b - 1)) & 1;
-                break;
-
-            // All other ops: no C/V updates
-            default:
-                break;
+            }
         }
     }
     return result;
 }
 
-bool should_branch(bits cc, struct alu_flags_t f) {
+bool should_branch(word cc, struct alu_flags_t f) {
     switch (cc & 0xF) {
         case 0x0: return f.Z == 1;                        // EQ
         case 0x1: return f.Z == 0;                        // NE
@@ -211,121 +133,124 @@ bool should_branch(bits cc, struct alu_flags_t f) {
 }
 
 const char* Bcc_names[16] = {
-    "eq",  // 0x0: z == 1
-    "ne",  // 0x1: z == 0
-    "cs",  // 0x2: c == 1
-    "cc",  // 0x3: c == 0
-    "mi",  // 0x4: n == 1
-    "pl",  // 0x5: n == 0
-    "vs",  // 0x6: v == 1
-    "vc",  // 0x7: v == 0
-    "hi",  // 0x8: c == 1 && z == 0
-    "ls",  // 0x9: c == 0 || z == 1
-    "ge",  // 0xA: n == v
-    "lt",  // 0xB: n != v
-    "gt",  // 0xC: z == 0 && n == v
-    "le",  // 0xD: z == 1 || n != v
-    "al",  // 0xE: always
-    "nv"   // 0xF: never
+    "eq",  // 0x0: equal            z == 1              (==)
+    "ne",  // 0x1: not equal        z == 0              (!=)
+    "hs",  // 0x2: higher or same   c == 1              (unsigned >=)
+    "lo",  // 0x3: lower            c == 0              (unsigned <)
+    "mi",  // 0x4: minus            n == 1              (signed < 0)
+    "pl",  // 0x5: plus             n == 0              (signed >= 0)
+    "vs",  // 0x6: overflow set     v == 1              (signed overflow)
+    "vc",  // 0x7: overflow clear   v == 0              (signed no overflow)
+    "hi",  // 0x8: higher           c == 1 && z == 0    (unsigned >)
+    "ls",  // 0x9: lower or same    c == 0 || z == 1    (unsigned <=)
+    "ge",  // 0xA: greater or equal n == v              (signed >=)
+    "lt",  // 0xB: less than        n != v              (signed <)
+    "gt",  // 0xC: greater than     z == 0 && n == v    (signed >)
+    "le",  // 0xD: less or equal    z == 1 || n != v    (signed <=)
+    "al",  // 0xE: always           true
+    "nv"   // 0xF: never            false
 };
 
 int main(int argc, char *argv[])
 {
+    (void)argc;
+    (void)argv;
+
     // reset
     reg[PC] = FLASH_BASE;
     reg[SP] = RAM_BASE;
 
     for(;;) {
         // fetch
-        word pc = reg[PC];  // snapshot current PC
-        word addr = (pc - FLASH_BASE) >> 1; // byte address, relative to base
-        word ir = flash[addr];
-        word next_pc = pc + 2;  // default: advance to next instruction
+        word pc = reg[PC];                              // get current program counter value
+        word ir = FLASH(pc);                            // fetch instruction to instruction register (ir)
+        reg[PC] += 2;                                   // increment program counter to next instruction
 
         // decode and execute
-        bits group = bits_extract(ir, 15,12); // instruction group
-        if(group == 0b0000) {         // MOVS <Rd>,<Rm>
-            bits d = bits_extract(ir, 2, 0);
-            bits n = bits_extract(ir, 5, 3);
-            if(trace & 1) printf("0x%04x: movs r%d, r%d\n", pc, d, n);
-            bits a = reg[n];
-            bits b = 0;
-            bits r = alu(a, b, ALU_OP_ORR, true); // triggers flag update
-            reg[d] = r;
+        word group = bits_extract(ir, 15,12);           // decode instruction group:
 
-        } else if(group == 0b0001) { // ADDS/SUBS <Rd>,<Rn>,<Rm>
-            bits d = bits_extract(ir, 2, 0);
-            bits n = bits_extract(ir, 5, 3);
-            bits m = bits_extract(ir, 8, 6);
+        if(group == 0b0000) {                           // MOVS <Rd>,<Rm>
+            word d = bits_extract(ir, 2, 0);
+            word n = bits_extract(ir, 5, 3);
+            word a = reg[n];
+            word b = 0;
+            word r = alu(a, b, ALU_OP_ADD, 1);
+            reg[d] = r;
+            printf("0x%04x: movs r%d, r%d\n", pc, d, n);
+
+        } else if(group == 0b0001) {                    // ADDS/SUBS <Rd>,<Rn>,<Rm>
+            word d = bits_extract(ir, 2, 0);
+            word n = bits_extract(ir, 5, 3);
+            word m = bits_extract(ir, 8, 6);
             alu_op_t alu_op = bits_extract(ir, 9, 9) ? ALU_OP_SUB : ALU_OP_ADD;
-            if(trace & 1) printf("0x%04x\t%ss r%d, r%d, r%d\n", pc, alu_op_names[alu_op], d, n, m);
-            bits a = reg[n];
-            bits b = reg[m];
-            bits r = alu(a, b, alu_op, true);
+            word a = reg[n];
+            word b = reg[m];
+            word r = alu(a, b, alu_op, 2);
             reg[d] = r;
+            printf("0x%04x\t%ss r%d, r%d, r%d\n", pc, alu_op_names[alu_op], d, n, m);
 
-        } else if(group == 0b0010) { // MOVS <Rd>, #<imm8>
-            bits d = bits_extract(ir, 10, 8);
-            bits i = bits_extract(ir, 7, 0);
-            if(trace & 1) printf("0x%04x\tmovs r%d, #%d\n", pc, d, i);
-            bits a = 0;
-            bits b = zero_extend_u(i, 8);
-            bits r = alu(a, b, ALU_OP_ORR, true); // triggers flag update
+        } else if(group == 0b0010) {                    // MOVS <Rd>, #<imm8>
+            word d = bits_extract(ir, 10, 8);
+            word i = zero_extend(ir, 8);
+            word a = 0;
+            word b = i;
+            word r = alu(a, b, ALU_OP_ADD, 1);
             reg[d] = r;
+            printf("0x%04x\tmovs r%d, #%d\n", pc, d, i);
 
-        } else if(group == 0b0011) { // ADDS/SUBS <Rdn>,#<imm8>
-            bits d = bits_extract(ir, 10, 8);
-            bits n = bits_extract(ir, 10, 8);
-            bits i = bits_extract(ir,  7, 0);
+        } else if(group == 0b0011) {                    // ADDS/SUBS <Rdn>,#<imm8>
+            word d = bits_extract(ir, 10, 8);
+            word n = bits_extract(ir, 10, 8);
+            word i = zero_extend(ir, 8);
             alu_op_t alu_op = bits_extract(ir, 11, 11) ? ALU_OP_SUB : ALU_OP_ADD;
-            if(trace & 1) printf("0x%04x\t%ss r%d, r%d, #%d\n", pc, alu_op_names[alu_op], d, n, i);
-            bits a = reg[n];
-            bits b = zero_extend_u(i, 8);
-            bits r = alu(a, b, alu_op, true);
+            word a = reg[n];
+            word b = i;
+            word r = alu(a, b, alu_op, 2);
             reg[d] = r;
+            printf("0x%04x\t%ss r%d, r%d, #%d\n", pc, alu_op_names[alu_op], d, n, i);
 
-        } else if(group == 0b1001) { // LDR/STR <Rt>,[<SP>,#<imm8>]
-            bits t = bits_extract(ir, 10, 8);
-            bits i = bits_extract(ir, 7, 0);
+        } else if(group == 0b1001) {                    // LDR/STR <Rt>,[<SP>,#<imm8>]
+            word t = bits_extract(ir, 10, 8);
+            word i = zero_extend(ir, 8);
             bool is_ldr = bits_extract(ir, 11, 11);
-            bits a = reg[SP];
-            bits b = zero_extend_u(i, 8) << 2;  // scale by 4 for 32-bit ldr/str
-            bits r = alu(a, b, ALU_OP_ADD, false);
-            if(trace & 1) printf("0x%04x\t%s r%d, [sp, #%d]\n", pc, is_ldr ? "ldr" : "str", t, b);
-            word addr = (r - RAM_BASE) >> 2;    // our RAM has 32-bit elements
+            word a = reg[SP];
+            word b = i << 2;                            // scale by 4 for 32-bit ldr/str
+            word r = alu(a, b, ALU_OP_ADD, 0);
             if(is_ldr) {
-                reg[t] = ram[addr];
+                reg[t] = RAM(r);                        // LDR
             } else {
-                ram[addr] = reg[t];
+                RAM(r) = reg[t];                        // STR
             }
+            printf("0x%04x\t%s r%d, [sp, #%d]\n", pc, is_ldr ? "ldr" : "str", t, b);
 
-        } else if(group == 0b1101) { // Bcc #<simm8>
-            bits cc = bits_extract(ir, 11, 8);
-            bits i =  bits_extract(ir, 7, 0);
-            int32_t simm8 = sign_extend_u(i, 8);
-            bits target_pc = pc + 4 + (2 * simm8); // offset in bytes
-            bool is_taken = should_branch(cc, alu_flags);
-            if(trace & 1) printf("0x%04x\tb%s  %+d          ; 0x%04x (%s)\n", pc, Bcc_names[cc], simm8, target_pc, is_taken ? "taken" : "not taken");
-            if(is_taken) {
-                next_pc = target_pc;
+        } else if(group == 0b1101) {                    // Bcc #<simm8>
+            word cc = bits_extract(ir, 11, 8);          // branch condition code
+            int32_t i = sign_extend(ir, 8);             // simm8
+            word a = reg[PC] + 2;                       // program counter seen in the pipeline
+            word b = i << 1;                            // branch offset in bytes
+            word r = alu(a, b, ALU_OP_ADD, 0);
+            bool do_branch = should_branch(cc, alu_flags);
+            if(do_branch) {
+                reg[PC] = r;                            // execute the branch (conditionally)
             } 
+            printf("0x%04x\tb%s  %+d          ; 0x%04x (%s)\n", 
+                pc, Bcc_names[cc], i, r, do_branch ? "taken" : "not taken");
 
-        } else if(group == 0b1110) { // B #<simm11>
-            bits i =  bits_extract(ir, 10, 0);
-            int32_t simm11 = sign_extend_u(i, 11);
-            bits target_pc = pc + 4 + (2 * simm11); // offset in bytes
-            if(trace & 1) printf("0x%04x\tb    %+d          ; 0x%04x\n", pc, simm11, target_pc);
-            if(pc == target_pc) {
-                printf("endless loop detected -> halting simulation\n");
+        } else if(group == 0b1110) {                    // B #<simm11>
+            int32_t i = sign_extend(ir, 11);            // simm11
+            word a = reg[PC] + 2;                       // program counter seen in the pipeline
+            word b = i << 1;                            // branch offset i in halfwords to bytes
+            word r = alu(a, b, ALU_OP_ADD, 0);
+            if(r == pc) {
+                printf("endless self loop detected -> halting simulation\n");
                 return 0;
             }
-            next_pc = target_pc; // unconditionally
+            reg[PC] = r;                                // execute the branch (uncoditionally)
+            printf("0x%04x\tb    %+d          ; 0x%04x\n", pc, i, r);
 
         } else {
             printf("illegal instruction 0x%04x\n", ir);
             return -1;  // release the blue smoke 
         }
-
-        reg[PC] = next_pc;
     }
 }

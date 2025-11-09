@@ -11,15 +11,13 @@ typedef uint16_t halfword;  // 16-bit half word
 typedef uint8_t byte;       // 8-bit
 
 typedef enum {
-    ALU_OP_ADD,     // ADD Rd, Rn, Rm    — Thumb format: multiple encodings (not ALU opcode field)
-    ALU_OP_SUB      // SUB Rd, Rn, Rm    — Thumb format: multiple encodings (not ALU opcode field)
-    // ...
+    ALU_OP_ADD,     // r = a + b
+    ALU_OP_SUB      // r = a - b
 } alu_op_t;
 
 const char* alu_op_names[] = {
     "add",   // ALU_OP_ADD
     "sub",   // ALU_OP_SUB
-    // ...
 };
 
 struct alu_flags_t {
@@ -74,7 +72,7 @@ static inline word sign_extend(word v, unsigned width) {
     return (v & sign) ? (v | ~mask) : (v & mask);
 }
 
-// update_flags: 0: none 1: NZ 2: NZCV
+// execute ALU operation. update_flags: 0: none 1: NZ 2: NZCV
 word alu(word a, word b, alu_op_t op, word update_flags)
 {
     word result = 0;
